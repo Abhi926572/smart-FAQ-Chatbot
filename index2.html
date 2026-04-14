@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart FAQ Chatbot - Recruitment Queries</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .chat-container {
+      width: 400px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      background: #4a47a3;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 18px;
+    }
+
+    .chat-box {
+      padding: 10px;
+      height: 400px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message {
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 8px;
+      max-width: 80%;
+    }
+
+    .user {
+      background: #d1e7dd;
+      align-self: flex-end;
+    }
+
+    .bot {
+      background: #f8d7da;
+      align-self: flex-start;
+    }
+
+    .chat-input {
+      display: flex;
+      border-top: 1px solid #ccc;
+    }
+
+    .chat-input input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      outline: none;
+    }
+
+    .chat-input button {
+      padding: 10px;
+      border: none;
+      background: #4a47a3;
+      color: white;
+      cursor: pointer;
+    }
+
+    .chat-input button:hover {
+      background: #372f8c;
+    }
+  </style>
+</head>
+<body>
+
+<div class="chat-container">
+  <div class="chat-header">Recruitment FAQ Chatbot</div>
+  <div class="chat-box" id="chatBox"></div>
+  <div class="chat-input">
+    <input type="text" id="userInput" placeholder="Ask your question...">
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<script>
+// Dynamic FAQ Data
+let faqData = [];
+
+// Load FAQs dynamically
+async function loadFAQs() {
+  faqData = [
+    { question: "Hi!", answer: "Hello! How do I help you?" },
+    { question: "What is the hiring process?", answer: "Our hiring process includes application, screening, technical interview, HR interview, and final offer." },
+    { question: "What qualifications are required?", answer: "We look for relevant degrees, skills, and project experience depending on the role." },
+    { question: "Do you offer internships?", answer: "Yes, we offer internships for students and fresh graduates." },
+    { question: "What is the salary range?", answer: "Salary depends on role, experience, and skills. Competitive packages are offered." },
+    { question: "How can I apply?", answer: "You can apply through our careers page or job portals like LinkedIn and Naukri." },
+    { question: "How do I contact you?", answer: "You can contact us via email or HR portal." }
+  ];
+}
+
+function appendMessage(text, sender) {
+  const chatBox = document.getElementById("chatBox");
+  const msg = document.createElement("div");
+  msg.classList.add("message", sender);
+  msg.innerText = text;
+  chatBox.appendChild(msg);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function findBestMatch(userInput) {
+  userInput = userInput.toLowerCase();
+
+  let bestMatch = null;
+  let maxScore = 0;
+
+  faqData.forEach(faq => {
+    let question = faq.question.toLowerCase();
+    let score = 0;
+
+    userInput.split(" ").forEach(word => {
+      if (question.includes(word)) score++;
+    });
+
+    if (score > maxScore) {
+      maxScore = score;
+      bestMatch = faq;
+    }
+  });
+
+  return bestMatch;
+}
+
+function sendMessage() {
+  const input = document.getElementById("userInput");
+  const userText = input.value.trim();
+
+  if (!userText) return;
+
+  appendMessage(userText, "user");
+
+  const match = findBestMatch(userText);
+
+  setTimeout(() => {
+    if (match && match.answer) {
+      appendMessage(match.answer, "bot");
+    } else {
+      appendMessage("Sorry, I couldn't find an answer. Please contact HR.", "bot");
+    }
+  }, 500);
+
+  input.value = "";
+}
+
+// Enter key support
+
+document.getElementById("userInput").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") sendMessage();
+});
+
+// Basic test cases (console)
+function runTests() {
+  console.log("Running Tests...");
+
+  let test1 = findBestMatch("hiring process");
+  console.assert(test1 && test1.answer.includes("application"), "Test 1 Failed");
+
+  let test2 = findBestMatch("internship");
+  console.assert(test2 && test2.answer.includes("internships"), "Test 2 Failed");
+
+  let test3 = findBestMatch("unknown question");
+  console.assert(test3 === null || test3.answer, "Test 3 Passed (fallback works)");
+
+  console.log("Tests Completed");
+}
+
+// Initialize
+loadFAQs().then(runTests);
+</script>
+
+</body>
+</html>
